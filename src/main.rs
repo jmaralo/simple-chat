@@ -26,7 +26,7 @@ async fn main() {
     });
 
     let app = Router::new()
-        .route("/sign-in", post(create_user))
+        .route("/new-user", post(create_user))
         .with_state(app_state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
