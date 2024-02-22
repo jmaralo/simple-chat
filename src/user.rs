@@ -1,7 +1,15 @@
 use std::fmt::Display;
 
-#[derive(Hash, Eq, PartialEq)]
+use serde::Serialize;
+
+#[derive(Hash, Eq, PartialEq, Serialize)]
 pub struct UserName(String);
+
+impl UserName {
+    pub fn clone(&self) -> Self {
+        UserName(self.0.clone())
+    }
+}
 
 impl From<String> for UserName {
     fn from(value: String) -> Self {
