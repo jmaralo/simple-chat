@@ -4,7 +4,7 @@ use axum::{extract::State, http::StatusCode, Json};
 use serde::Serialize;
 use tracing::debug;
 
-use crate::{user::UserName, AppState};
+use crate::state::{user::UserName, AppState};
 
 pub async fn get(State(state): State<Arc<AppState>>) -> (StatusCode, Json<UserList>) {
     let users = match state.user_list.lock() {

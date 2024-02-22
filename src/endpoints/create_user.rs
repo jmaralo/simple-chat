@@ -7,7 +7,7 @@ use axum::{
 use serde::Deserialize;
 use tracing::{debug, info};
 
-use crate::{user::UserName, AppState};
+use crate::state::{user::UserName, AppState};
 
 pub async fn post(State(state): State<Arc<AppState>>, Json(new_user): Json<NewUser>) -> StatusCode {
     let user_name = match new_user.validate_name() {

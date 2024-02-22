@@ -11,14 +11,11 @@ use tracing::info;
 
 use crate::{
     endpoints::{create_user, users},
-    user::UserName,
+    state::AppState,
 };
 
 mod endpoints;
-mod user;
-struct AppState {
-    user_list: Mutex<HashMap<UserName, String>>,
-}
+mod state;
 
 #[tokio::main]
 async fn main() {
