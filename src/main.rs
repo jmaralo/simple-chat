@@ -11,7 +11,7 @@ use axum::{
     Router,
 };
 use serde::Deserialize;
-use tracing::{debug, info, warn};
+use tracing::{debug, info};
 
 struct AppState {
     user_list: Mutex<HashMap<UserName, String>>,
@@ -79,7 +79,7 @@ impl NewUser {
         if self.name.len() > 12 {
             return Err("name too long");
         }
-        return Ok(UserName(self.name.clone()));
+        Ok(UserName(self.name.clone()))
     }
 }
 
