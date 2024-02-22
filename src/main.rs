@@ -3,10 +3,16 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use axum::{routing::post, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use tracing::info;
 
-use crate::{endpoints::create_user, user::UserName};
+use crate::{
+    endpoints::{create_user, users},
+    user::UserName,
+};
 
 mod endpoints;
 mod user;
@@ -23,6 +29,7 @@ async fn main() {
     });
 
     let app = Router::new()
+        .route("/users", get(users::get))
         .route("/new-user", post(create_user::post))
         .with_state(app_state);
 
