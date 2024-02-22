@@ -9,12 +9,6 @@ use tracing::{debug, info};
 
 use crate::{user::UserName, AppState};
 
-#[derive(Deserialize)]
-pub struct NewUser {
-    name: String,
-    password: String,
-}
-
 pub async fn post(State(state): State<Arc<AppState>>, Json(new_user): Json<NewUser>) -> StatusCode {
     let user_name = match new_user.validate_name() {
         Ok(name) => name,
@@ -40,6 +34,12 @@ pub async fn post(State(state): State<Arc<AppState>>, Json(new_user): Json<NewUs
     info!("Adding new user \"{}\"", user_name);
     user_list.insert(user_name, new_user.password);
     return StatusCode::CREATED;
+}
+
+#[derive(Deserialize)]
+pub struct NewUser {
+    name: String,
+    password: String,
 }
 
 impl NewUser {
