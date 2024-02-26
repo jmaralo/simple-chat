@@ -5,48 +5,48 @@ use axum::{
     http::StatusCode,
 };
 use serde::Deserialize;
-use tracing::{debug, info};
+use tracing::debug;
 
-use crate::state::{user::UserName, AppState};
+use crate::state::{
+    auth::Token,
+    user::{Name, User},
+    AddUserError, AppState,
+};
 
 pub async fn post(State(state): State<Arc<AppState>>, Json(new_user): Json<NewUser>) -> StatusCode {
-    let user_name = match new_user.validate_name() {
+    let user_name = match Name::try_from(new_user.name.clone()) {
         Ok(name) => name,
         Err(reason) => {
-            debug!("Invalid username \"{}\", reason: {}", new_user.name, reason);
+            debug!(
+                "Invalid user name \"{}\", reason: {}",
+                new_user.name, reason
+            );
             return StatusCode::BAD_REQUEST;
         }
     };
 
-    let mut user_list = match state.user_list.lock() {
-        Ok(guard) => guard,
-        Err(error) => {
-            debug!("user_list mutex poisoned: {}", error);
-            return StatusCode::INTERNAL_SERVER_ERROR;
+    let user_token = match Token::try_from(new_user.password.clone()) {
+        Ok(token) => token,
+        Err(reason) => {
+            debug!(
+                "Invalid user token \"{}\", reason: {}",
+                new_user.password, reason
+            );
+            return StatusCode::BAD_REQUEST;
         }
     };
 
-    if (*user_list).contains_key(&user_name) {
-        info!("User \"{}\" already exists", user_name);
-        return StatusCode::CONFLICT;
-    }
+    let user = User::new(user_name, user_token);
 
-    info!("Adding new user \"{}\"", user_name);
-    user_list.insert(user_name, new_user.password);
-    return StatusCode::CREATED;
+    return match state.add_user(user) {
+        Ok(()) => StatusCode::CREATED,
+        Err(AddUserError::AlreadyExists) => StatusCode::CONFLICT,
+        Err(AddUserError::Other) => StatusCode::INTERNAL_SERVER_ERROR,
+    };
 }
 
 #[derive(Deserialize)]
 pub struct NewUser {
     name: String,
     password: String,
-}
-
-impl NewUser {
-    fn validate_name(&self) -> Result<UserName, &'static str> {
-        if self.name.len() > 12 {
-            return Err("name too long");
-        }
-        Ok(UserName::from(self.name.clone()))
-    }
 }

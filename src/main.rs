@@ -1,7 +1,4 @@
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-};
+use std::sync::Arc;
 
 use axum::{
     routing::{get, post},
@@ -21,9 +18,7 @@ mod state;
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    let app_state = Arc::new(AppState {
-        user_list: Mutex::new(HashMap::new()),
-    });
+    let app_state = Arc::new(AppState::default());
 
     let app = Router::new()
         .route("/users", get(users::get))
