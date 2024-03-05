@@ -4,11 +4,10 @@ use std::{
     sync::Mutex,
 };
 
-use tracing::debug;
+use tracing::error;
 
 use self::user::{Name, User};
 
-pub mod auth;
 pub mod user;
 
 #[derive(Default)]
@@ -19,7 +18,7 @@ pub struct AppState {
 impl AppState {
     pub fn add_user(&self, new_user: User) -> Result<(), AddUserError> {
         let Ok(mut guard) = self.users.lock() else {
-            debug!("users mutex poisoned");
+            error!("users mutex poisoned");
             return Err(AddUserError::Other);
         };
 
@@ -34,20 +33,24 @@ impl AppState {
 
     pub fn users(&self) -> Result<Vec<Name>, UsersError> {
         let Ok(guard) = self.users.lock() else {
-            debug!("users mutex poisoned");
+            error!("users mutex poisoned");
             return Err(UsersError::Other);
         };
 
         Ok(guard.keys().map(|name_ref| name_ref.clone()).collect())
     }
 
-    pub fn user_exists(&self, name: &Name) -> Result<bool, UsersError> {
+    pub fn get_user(&self, name: &Name) -> Result<Option<User>, UsersError> {
         let Ok(guard) = self.users.lock() else {
-            debug!("users mutex poisoned");
+            error!("users mutex poisoned");
             return Err(UsersError::Other);
         };
 
-        Ok(guard.contains_key(name))
+        if guard.contains_key(name) {
+            return Ok(Some(guard[name].clone()));
+        } else {
+            return Ok(None);
+        }
     }
 }
 

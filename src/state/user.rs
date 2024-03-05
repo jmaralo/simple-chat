@@ -2,27 +2,23 @@ use std::fmt::Display;
 
 use serde::Serialize;
 
-use super::auth::{TemporalToken, Token};
-
 pub struct User {
     name: Name,
-
-    token: Token,
-    temporal_token: Option<TemporalToken>,
 }
 
 impl User {
-    pub fn new(name: Name, token: Token) -> Self {
-        Self {
-            name,
-
-            token,
-            temporal_token: None,
-        }
+    pub fn new(name: Name) -> Self {
+        Self { name }
     }
 
     pub fn name(&self) -> &Name {
         &self.name
+    }
+
+    pub fn clone(&self) -> Self {
+        Self {
+            name: self.name.clone(),
+        }
     }
 }
 

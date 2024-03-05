@@ -8,7 +8,6 @@ use serde::Deserialize;
 use tracing::debug;
 
 use crate::state::{
-    auth::Token,
     user::{Name, User},
     AddUserError, AppState,
 };
@@ -25,18 +24,7 @@ pub async fn post(State(state): State<Arc<AppState>>, Json(new_user): Json<NewUs
         }
     };
 
-    let user_token = match Token::try_from(new_user.password.clone()) {
-        Ok(token) => token,
-        Err(reason) => {
-            debug!(
-                "Invalid user token \"{}\", reason: {}",
-                new_user.password, reason
-            );
-            return StatusCode::BAD_REQUEST;
-        }
-    };
-
-    let user = User::new(user_name, user_token);
+    let user = User::new(user_name);
 
     return match state.add_user(user) {
         Ok(()) => StatusCode::CREATED,
@@ -48,5 +36,4 @@ pub async fn post(State(state): State<Arc<AppState>>, Json(new_user): Json<NewUs
 #[derive(Deserialize)]
 pub struct NewUser {
     name: String,
-    password: String,
 }

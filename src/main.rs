@@ -21,7 +21,8 @@ async fn main() {
     let app_state = Arc::new(AppState::default());
 
     let app = Router::new()
-        .route("/users", get(users::get))
+        .route("/users", get(users::list))
+        .route("/users/:user-name", get(users::get))
         .route("/new-user", post(create_user::post))
         .with_state(app_state);
 
